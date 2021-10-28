@@ -6,7 +6,7 @@ const getWorld = world => world;
 
 const App = () => {
 
-	const initialStories = [
+	const stories = [
 		{ 
 			title: 'React', 
 			url: 'https://reactjs.org',
@@ -25,37 +25,18 @@ const App = () => {
 		},
 		{
 			title: 'C#', 
-			url: 'https://code.visualstudio.com/docs/languages/csharp',
+			url: 'https://csharp.org',
 			author: 'Pat McGee',
 			num_comments: 1,
 			points: 3,
 			objectID: 2
-		},
-		{
-			title: 'JavaScript', 
-			url: 'https://js.org/',
-			author: 'David Flanagan',
-			num_comments: 10,
-			points: 8,
-			objectID: 3
 		}
 	];
-
-	const getAsyncStories = () => new Promise((resolve) => 
-		setTimeout( () => resolve({ data: { stories: initialStories }}), 2000
-	));
 
 	const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'C#');
 	
 	const handleSearch = event => setSearchTerm(event.target.value);
-	const [stories, setStories] = React.useState([]);
-	React.useEffect(() => { getAsyncStories().then(result => { setStories(result.data.stories); }); }, []);
-
 	const searchedStories = stories.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
-	const handleRemoveStories = (item) => { 
-		const newStories = stories.filter((story) => item.objectID !== story.objectID); 
-		setStories(newStories);
-	};
 
 	return(
 		<div>
@@ -67,7 +48,7 @@ const App = () => {
 				<strong>Searh:</strong>
 			</InputWithLabel>
 			<hr />
-			<List list={ searchedStories } onRemoveItem={ handleRemoveStories } />
+			<List list={ searchedStories } />
 		</div>
 	);
 }
@@ -94,22 +75,16 @@ const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, ch
 	);
 };
 
-const List = ({ list, onRemoveItem }) => (
-	<ul> 
-		{ list.map((item) => (<Item key={ item.objectID } item={ item } onRemoveItem={ onRemoveItem } /> )) }
-	</ul>);
+const List = ({list}) => (<ul> { list.map(({objectID, ...item}) => <Item key={ objectID } { ...item } /> ) } </ul>);
 
-const Item = ({item, onRemoveItem}) => ( 
+const Item = ({title, url, author, num_comments, points}) => ( 
 	<li>
 		<span>
-			<a href={ item.url } > { item.title } </a>
+			<a href={ url } > { title } </a>
 		</span>
-		<span>{ item.author } </span>
-		<span>{ item.num_comments } </span>
-		<span>{ item.points } </span>
-		<span> 
-			<button type="button" onClick={ () => onRemoveItem(item) } >  Dismiss </button>
-		</span>
+		<span>{ author } </span>
+		<span>{ num_comments } </span>
+		<span>{ points } </span>
 	</li>
 );
 

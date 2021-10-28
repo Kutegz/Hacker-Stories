@@ -41,16 +41,10 @@ const App = () => {
 		}
 	];
 
-	const getAsyncStories = () => new Promise((resolve) => 
-		setTimeout( () => resolve({ data: { stories: initialStories }}), 2000
-	));
-
 	const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'C#');
 	
 	const handleSearch = event => setSearchTerm(event.target.value);
-	const [stories, setStories] = React.useState([]);
-	React.useEffect(() => { getAsyncStories().then(result => { setStories(result.data.stories); }); }, []);
-
+	const [stories, setStories] = React.useState(initialStories);
 	const searchedStories = stories.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 	const handleRemoveStories = (item) => { 
 		const newStories = stories.filter((story) => item.objectID !== story.objectID); 
