@@ -44,9 +44,8 @@ function App() {
 
 const Search = () => {
 	const [searchTerm, setSearchTerm] = React.useState('');
-	const handleChange = event => { 
-		setSearchTerm(event.target.value); 
-	}
+	const handleChange = event => setSearchTerm(event.target.value); 
+	
 	return(
 		<div>
 		<label htmlFor="search" >Search: </label>
