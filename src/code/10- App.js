@@ -28,32 +28,64 @@ const storiesReducer = (state, action) => {
     }
 };
 
-const API_ENSPOINT = 'https://hn.algolia.com/api/v1/search?query=';
-
 const App = () => {
 
-	const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'react');
+	const initialStories = [
+		{ 
+			title: 'React', 
+			url: 'https://reactjs.org',
+			author: 'Jordan Walke',
+			num_comments: 3,
+			points: 4,
+			objectID: 0
+		},
+		{
+			title: 'Redux', 
+			url: 'https://redux.js.org',
+			author: 'Dan Abramov, Andrew Clark',
+			num_comments: 2,
+			points: 5,
+			objectID: 1
+		},
+		{
+			title: 'C#', 
+			url: 'https://code.visualstudio.com/docs/languages/csharp',
+			author: 'Pat McGee',
+			num_comments: 1,
+			points: 3,
+			objectID: 2
+		},
+		{
+			title: 'JavaScript', 
+			url: 'https://js.org/',
+			author: 'David Flanagan',
+			num_comments: 10,
+			points: 8,
+			objectID: 3
+		}
+	];
+
+	const getAsyncStories = () => new Promise((resolve) => 
+		setTimeout(() => resolve({ data: { stories: initialStories }}), 1000
+	));
+
+	const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'C#');
 	
 	const handleSearch = event => setSearchTerm(event.target.value);
 	const [stories, dispatchStories] = React.useReducer(storiesReducer, { data: [], isLoading: false, isError: false});
-
-	const handleFetchStories = React.useCallback(() => {		// B		
-		if (searchTerm === '') return;
-
+	
+	React.useEffect(() => { 
 		dispatchStories({ type: STORIES_FETCH_INIT });
-
-		fetch(`${ API_ENSPOINT }${ searchTerm }`)
-		.then(response => response.json())
-		.then(result => { 
+		getAsyncStories().then(result => { 
 			dispatchStories({
 				type: STORIES_FETCH_SUCCESS,
-				payload: result.hits
+				payload: result.data.stories
 			});
 		}).catch(() => dispatchStories({ type: STORIES_FETCH_FAILURE })); 
-	}, [searchTerm]);
-	
-	React.useEffect(() => { handleFetchStories(); }, [handleFetchStories]);	// C, D
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
+	const searchedStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 	const handleRemoveStories = item => { 
 		dispatchStories({
 			type: REMOVE_STORY,
@@ -72,7 +104,7 @@ const App = () => {
 			</InputWithLabel>
 			<hr />
 			{ stories.isError && <p>Something went wrong ...</p> }
-			{ stories.isLoading ? (<p>Loading ... </p>) : (<List list={ stories.data } onRemoveItem={ handleRemoveStories } />) }
+			{ stories.isLoading ? (<p>Loading ... </p>) : (<List list={ searchedStories } onRemoveItem={ handleRemoveStories } />) }
 		</div>
 	);
 }

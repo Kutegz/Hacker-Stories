@@ -36,24 +36,21 @@ const App = () => {
 	
 	const handleSearch = event => setSearchTerm(event.target.value);
 	const [stories, dispatchStories] = React.useReducer(storiesReducer, { data: [], isLoading: false, isError: false});
-
-	const handleFetchStories = React.useCallback(() => {		// B		
-		if (searchTerm === '') return;
-
+	
+	React.useEffect(() => { 
 		dispatchStories({ type: STORIES_FETCH_INIT });
-
-		fetch(`${ API_ENSPOINT }${ searchTerm }`)
-		.then(response => response.json())
+		fetch(`${API_ENSPOINT}react`)			// B
+		.then(response => response.json())		// C
 		.then(result => { 
 			dispatchStories({
 				type: STORIES_FETCH_SUCCESS,
 				payload: result.hits
 			});
 		}).catch(() => dispatchStories({ type: STORIES_FETCH_FAILURE })); 
-	}, [searchTerm]);
-	
-	React.useEffect(() => { handleFetchStories(); }, [handleFetchStories]);	// C, D
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
+	const searchedStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 	const handleRemoveStories = item => { 
 		dispatchStories({
 			type: REMOVE_STORY,
@@ -72,7 +69,7 @@ const App = () => {
 			</InputWithLabel>
 			<hr />
 			{ stories.isError && <p>Something went wrong ...</p> }
-			{ stories.isLoading ? (<p>Loading ... </p>) : (<List list={ stories.data } onRemoveItem={ handleRemoveStories } />) }
+			{ stories.isLoading ? (<p>Loading ... </p>) : (<List list={ searchedStories } onRemoveItem={ handleRemoveStories } />) }
 		</div>
 	);
 }
