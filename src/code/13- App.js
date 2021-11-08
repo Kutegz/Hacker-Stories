@@ -40,19 +40,28 @@ const App = () => {
 	const handleSearchInput = event => setSearchTerm(event.target.value);
 	const handleSearchSubmit = () => setUrl(`${ API_ENSPOINT }${ searchTerm }`);
 
-	const handleFetchStories = React.useCallback(async () => {		// B	
+	const handleFetchStories = React.useCallback(() => {		// B	
 
 		dispatchStories({ type: STORIES_FETCH_INIT });
-		try {
-			const result = await axios.get(url);		
-			dispatchStories({ type: STORIES_FETCH_SUCCESS, payload: result.data.hits });
-		} catch { dispatchStories({ type: STORIES_FETCH_FAILURE }); }
 
+		axios
+		.get(url)
+		.then(result => { 
+			dispatchStories({
+				type: STORIES_FETCH_SUCCESS,
+				payload: result.data.hits
+			});
+		}).catch(() => dispatchStories({ type: STORIES_FETCH_FAILURE })); 
 	}, [url]);
 	
 	React.useEffect(() => { handleFetchStories(); }, [handleFetchStories]);	// C, D
 
-	const handleRemoveStories = item => { dispatchStories({ type: REMOVE_STORY, payload: item }); };
+	const handleRemoveStories = item => { 
+		dispatchStories({
+			type: REMOVE_STORY,
+			payload: item
+		});
+	};
 
 	return(
 		<div>
